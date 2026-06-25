@@ -484,11 +484,11 @@ html, body {
 
       <!-- Only one pill as requested -->
       <div class="start-meta">
-        <div class="meta-pill">⏱ Beat the Timer</div>
+        <div class="meta-pill">Beat the Timer</div>
       </div>
 
       <button class="btn-start" id="btn-start">
-        <span class="btn-start-inner">▶ START GAME</span>
+        <span class="btn-start-inner">START GAME</span>
         <span class="btn-glow"></span>
       </button>
 
@@ -787,13 +787,19 @@ function loadQuiz(index) {
   qEyebrow.textContent = 'ROUND ' + (index + 1);
   qText.textContent    = quiz.question;
 
-  /* Answer buttons */
+  /* Answer buttons — fully reset all state so mobile doesn't carry over previous outlines */
+  var letters = ['A','B','C','D'];
   var btns = answersGrid.querySelectorAll('.answer-btn');
   btns.forEach(function(btn, i) {
-    btn.textContent      = quiz.options[i];
-    btn.dataset.letter   = ['A','B','C','D'][i];
-    btn.className        = 'answer-btn';   // reset all state classes
+    btn.className        = 'answer-btn';
     btn.disabled         = false;
+    btn.dataset.index    = i;
+    btn.dataset.letter   = letters[i];
+    btn.style.borderColor  = '';
+    btn.style.background   = '';
+    btn.style.boxShadow    = '';
+    btn.style.opacity      = '';
+    btn.textContent = quiz.options[i];
   });
 
   /* Hide result overlay */
@@ -904,7 +910,7 @@ function handleTimeout() {
 ════════════════════════════════════════════════════════════ */
 function showResult(isCorrect, correctAnswer, isTimeout) {
   resultOv.className  = 'result-overlay visible ' + (isCorrect ? 'correct' : 'wrong');
-  resultIcon.textContent = isCorrect ? '✓' : (isTimeout ? '⏱' : '✗');
+  resultIcon.textContent = isCorrect ? '✓' : '✗';
   resultText.textContent = isCorrect ? 'CORRECT!' : (isTimeout ? "TIME'S UP!" : 'WRONG!');
   resultSub.textContent  = '';
   if (isCorrect) spawnConfetti();
