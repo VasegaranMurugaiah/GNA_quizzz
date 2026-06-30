@@ -3,29 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nature Quiz Challenge</title>
+  <title>Nature Quiz Challenge — Bird Edition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
 
 /* ════════════════════════════════════════════════════════════
-   ECO-TOURISM QUIZ — Theme: Deep Forest / Biodiversity
-   Palette: Dark forest greens + warm amber accent
+   ECO-TOURISM QUIZ — Theme: Deep Forest / Bird Edition
+   Palette: Deep forest green, leaf green, warm amber
 ════════════════════════════════════════════════════════════ */
 
 :root {
-  --bg:         #07110a;
-  --surface:    #0d1f11;
-  --surface2:   #152419;
-  --green:      #52b788;      /* leaf green — main accent     */
+  --bg:         #07110a;      /* deep forest black              */
+  --surface:    #0d1f11;      /* dark forest floor              */
+  --surface2:   #152419;      /* medium forest                  */
+  --green:      #52b788;      /* leaf green — main accent       */
   --green-glow: rgba(82,183,136,0.35);
-  --amber:      #e8a020;      /* warm sunlight — CTA colour   */
+  --amber:      #e8a020;      /* warm amber — CTA colour        */
   --amber-glow: rgba(232,160,32,0.4);
-  --correct:    #4cde80;      /* bright correct outline       */
-  --wrong:      #ff4d4d;      /* bright wrong outline         */
-  --text:       #eef4ee;
-  --text-dim:   #7aaa82;
+  --correct:    #4cde80;      /* bright correct                 */
+  --wrong:      #ff4d6a;      /* coral red wrong                */
+  --text:       #eef4ee;      /* forest white                   */
+  --text-dim:   #7aaa82;      /* muted forest green             */
   --radius-sm:  8px;
   --radius-md:  14px;
   --radius-lg:  22px;
@@ -144,7 +144,7 @@ html, body {
 .btn-start-inner {
   position: relative; z-index: 2;
   display: flex; align-items: center; gap: 14px;
-  background: linear-gradient(135deg, var(--amber) 0%, #c87a10 100%);
+  background: linear-gradient(135deg, #e8a020 0%, #c87a10 100%);
   color: #07110a;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900;
@@ -175,36 +175,49 @@ html, body {
 }
 @keyframes blink { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
 
+.start-edition {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-top: -6px;
+}
+
 
 /* ════════════════════════════════════════════════════════════
    QUIZ SCREEN
 ════════════════════════════════════════════════════════════ */
-#quiz-screen { align-items: flex-start; }
-
-.quiz-bg {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; z-index: 1;
-  opacity: 0; transition: opacity 0.5s ease;
+#quiz-screen {
+  align-items: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
-.quiz-bg.visible { opacity: 1; }
 
+/* No longer a fullscreen background — hidden but kept for JS compatibility */
+.quiz-bg { display: none; }
+.video-overlay { display: none; }
 
-
-.video-overlay {
-  position: absolute; inset: 0; z-index: 2;
-  background: linear-gradient(to bottom,
-    rgba(7,17,10,0.88) 0%,
-    rgba(7,17,10,0.15) 30%,
-    rgba(7,17,10,0.15) 60%,
-    rgba(7,17,10,0.92) 100%
-  );
+/* ── QUIZ INNER LAYOUT (column, fits screen) ── */
+.quiz-inner {
+  position: relative; z-index: 10;
+  width: 100%; max-width: 640px;
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+  padding: 0 0 24px;
 }
 
 /* ── HUD BAR ── */
 .hud-bar {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+  width: 100%;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 28px; gap: 20px;
+  padding: 14px 20px; gap: 16px;
+  background: rgba(7,17,10,0.97);
+  border-bottom: 1px solid rgba(141,184,122,0.15);
+  position: sticky; top: 0; z-index: 20;
 }
 
 .hud-score { display: flex; flex-direction: column; align-items: flex-start; min-width: 70px; }
@@ -227,16 +240,40 @@ html, body {
 .hud-timer-num.warning { color: var(--amber); }
 .hud-timer-num.danger  { color: var(--wrong); }
 
-/* ── BOTTOM PANEL (holds question + answers, sizes to content) ── */
+/* ── PHOTO FRAME ── */
+.quiz-photo-frame {
+  width: calc(100% - 32px);
+  margin: 14px auto 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #030706;
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 3px solid #2a7a46;
+  box-shadow:
+    0 0 0 1px rgba(82,183,136,0.25),
+    inset 0 0 0 1px rgba(82,183,136,0.12),
+    0 8px 28px rgba(0,0,0,0.55);
+}
+.quiz-photo-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  border-radius: 9px;
+}
+.quiz-photo-frame img.visible { opacity: 1; }
+
+/* ── BOTTOM PANEL (question + answers below photo) ── */
 .quiz-bottom-panel {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 0 24px 24px;
+  gap: 12px;
+  padding: 16px 20px 8px;
+  width: 100%;
 }
 
 /* ── QUESTION CARD ── */
@@ -330,10 +367,11 @@ html, body {
 
 /* ── RESULT OVERLAY ── */
 .result-overlay {
-  position: absolute; inset: 0; z-index: 20;
+  position: fixed; inset: 0; z-index: 20;
   display: flex; align-items: center; justify-content: center;
   pointer-events: none; opacity: 0;
   transition: opacity 0.3s ease;
+  background: rgba(7,17,10,0.5);
 }
 .result-overlay.visible { opacity: 1; }
 
@@ -433,20 +471,21 @@ html, body {
 ════════════════════════════════════════════════════════════ */
 @media (max-width:600px) {
   .answers-grid { grid-template-columns:1fr; gap:8px; }
-  .quiz-bottom-panel { padding:0 16px 18px; gap:10px; }
-  .question-card { padding:12px 18px; }
-  .answer-btn { padding:13px 16px; gap:10px; }
+  .quiz-bottom-panel { padding:12px 14px 8px; gap:8px; }
+  .question-card { padding:12px 16px; }
+  .answer-btn { padding:13px 14px; gap:10px; }
   .answer-btn::before { min-width:28px; height:28px; font-size:0.85rem; }
-  .hud-bar { padding:12px 14px; }
+  .hud-bar { padding:10px 14px; }
   .hud-value { font-size:1.6rem; }
+  .quiz-photo-frame { width: calc(100% - 24px); }
 }
-/* Short / landscape phone screens — compact further so nothing gets clipped */
 @media (max-height:680px) {
-  .quiz-bottom-panel { gap:8px; padding-bottom:14px; }
-  .question-card { padding:10px 16px; }
-  .question-text { font-size: clamp(1.15rem, 3vw, 2rem); }
-  .answer-btn { padding:10px 14px; }
+  .quiz-bottom-panel { gap:7px; padding-bottom:10px; }
+  .question-card { padding:10px 14px; }
+  .question-text { font-size: clamp(1.1rem, 3vw, 1.8rem); }
+  .answer-btn { padding:10px 12px; }
   .hud-bar { padding:8px 14px; }
+  .quiz-photo-frame { aspect-ratio: 21/9; }
 }
 @media (min-width:1400px) {
   .question-card { max-width:1000px; }
@@ -468,7 +507,6 @@ html, body {
 
       <!-- Replace emoji + text with your actual logo image if needed -->
       <div class="logo-placeholder">
-        <span class="logo-icon">🌿</span>
         <span class="logo-text">ECO TOURISM CENTRE</span>
       </div>
 
@@ -479,12 +517,11 @@ html, body {
           <span class="accent">QUIZ</span>
           <span>CHALLENGE</span>
         </h1>
-
       </div>
 
       <!-- Only one pill as requested -->
       <div class="start-meta">
-        <div class="meta-pill">Beat the Timer</div>
+        <div class="meta-pill">BEAT THE TIMER</div>
       </div>
 
       <button class="btn-start" id="btn-start">
@@ -502,48 +539,57 @@ html, body {
   ════════════════════════════════════════════════════════ -->
   <div id="quiz-screen" class="screen">
 
+    <!-- Hidden img kept for JS compatibility (loadImage still sets src) -->
     <img id="quiz-bg" class="quiz-bg" alt="" />
-    <div class="video-overlay"></div>
 
-    <!-- HUD -->
-    <div class="hud-bar">
-      <div class="hud-score">
-        <span class="hud-label">Score</span>
-        <span class="hud-value" id="hud-score">0</span>
-      </div>
+    <div class="quiz-inner">
 
-      <div class="hud-progress">
-        <div class="progress-bar-track">
-          <div class="progress-bar-fill" id="progress-fill"></div>
+      <!-- HUD -->
+      <div class="hud-bar">
+        <div class="hud-score">
+          <span class="hud-label">Score</span>
+          <span class="hud-value" id="hud-score">0</span>
         </div>
-        <span class="hud-round" id="hud-round">1 / 10</span>
+
+        <div class="hud-progress">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <span class="hud-round" id="hud-round">1 / 8</span>
+        </div>
+
+        <div class="hud-timer-wrap">
+          <svg class="timer-ring" viewBox="0 0 64 64">
+            <circle class="timer-ring-bg"  cx="32" cy="32" r="27"/>
+            <circle class="timer-ring-bar" id="timer-ring-bar" cx="32" cy="32" r="27"/>
+          </svg>
+          <span class="hud-timer-num" id="timer-display">5</span>
+        </div>
       </div>
 
-      <div class="hud-timer-wrap">
-        <svg class="timer-ring" viewBox="0 0 64 64">
-          <circle class="timer-ring-bg"  cx="32" cy="32" r="27"/>
-          <circle class="timer-ring-bar" id="timer-ring-bar" cx="32" cy="32" r="27"/>
-        </svg>
-        <span class="hud-timer-num" id="timer-display">5</span>
-      </div>
-    </div>
-
-    <!-- Question + Answers — wrapped so they stack safely without overlapping -->
-    <div class="quiz-bottom-panel">
-      <div class="question-card">
-        <p class="question-eyebrow" id="question-eyebrow">ROUND 1</p>
-        <h2 class="question-text" id="question-text">Loading…</h2>
+      <!-- Photo Frame -->
+      <div class="quiz-photo-frame">
+        <img id="quiz-photo" alt="Bird photo" />
       </div>
 
-      <div class="answers-grid" id="answers-grid">
-        <button class="answer-btn" id="opt-0" data-index="0" data-letter="A"></button>
-        <button class="answer-btn" id="opt-1" data-index="1" data-letter="B"></button>
-        <button class="answer-btn" id="opt-2" data-index="2" data-letter="C"></button>
-        <button class="answer-btn" id="opt-3" data-index="3" data-letter="D"></button>
-      </div>
-    </div>
+      <!-- Question + Answers below photo -->
+      <div class="quiz-bottom-panel">
+        <div class="question-card">
+          <p class="question-eyebrow" id="question-eyebrow">ROUND 1</p>
+          <h2 class="question-text" id="question-text">Loading…</h2>
+        </div>
 
-    <!-- Result overlay -->
+        <div class="answers-grid" id="answers-grid">
+          <button class="answer-btn" id="opt-0" data-index="0" data-letter="A"></button>
+          <button class="answer-btn" id="opt-1" data-index="1" data-letter="B"></button>
+          <button class="answer-btn" id="opt-2" data-index="2" data-letter="C"></button>
+          <button class="answer-btn" id="opt-3" data-index="3" data-letter="D"></button>
+        </div>
+      </div>
+
+    </div><!-- end quiz-inner -->
+
+    <!-- Result overlay (fixed so it covers full screen) -->
     <div class="result-overlay" id="result-overlay">
       <div class="result-badge">
         <span class="result-icon" id="result-icon"></span>
@@ -598,7 +644,6 @@ html, body {
   </div>
 
 
-
   <script>
 'use strict';
 
@@ -610,52 +655,52 @@ html, body {
 ════════════════════════════════════════════════════════════ */
 const quizzes = [
   {
-    image: "photos/quiz1",
-    question: "Which bird seals the female inside a tree cavity during nesting, leaving only a narrow slit for food?",
-    options: ["Great Hornbill", "Streaked Spiderhunter", "Long-tailed Broadbill", "Rufous-bellied Eagle"],
-    answer: 0,
+    image: "photos/quiz1.jpg",
+    question: "Guess the bird?",
+    options: ["Silver-breasted Broadbill", "Long-tailed Broadbill", "Wreathed Hornbill", "Streaked Spiderhunter"],
+    answer: 2,
     timeLimit: 5
   },
   {
     image: "photos/quiz2.jpg",
     question: "Guess the bird?",
-    options: ["Cinereous Bulbul", "Black-crested Bulbul", "Silver-breasted Broadbill", "Rufous-bellied Eagle"],
-    answer: 1,
+    options: ["Cinereous Bulbul", "Rufous-bellied Eagle", "Silver-breasted Broadbill", "Black-crested Bulbul"],
+    answer: 3,
     timeLimit: 5
   },
   {
     image: "photos/quiz3.jpg",
-    question: "Its repetitive wooden call sounds exactly like someone tapping a Buddhist wooden fish drum.",
-    options: ["Orange-breasted Trogon", "Taiwan Barbet", "Long-tailed Broadbill", "Red-bearded Bee-eater"],
+    question: "Guess the bird?",
+    options: ["Orange Minivet (Male)", "Orange Minivet (Female)", "Taiwan Barbet", "Yellow-vented Bulbul"],
     answer: 1,
     timeLimit: 5
   },
   {
     image: "photos/quiz4.jpg",
     question: "Guess the bird?",
-    options: ["Streaked Wren-Babbler", "Orange Minivet", "Yellow-vented Bulbul", "Long-tailed Sibia"],
-    answer: 2,
+    options: ["Streaked Wren-Babbler", "Yellow-vented Bulbul", "Orange Minivet", "Long-tailed Sibia"],
+    answer: 1,
     timeLimit: 5
   },
   {
     image: "photos/quiz5.jpg",
     question: "Guess the bird?",
-    options: ["Silver-breasted Broadbill", "Long-tailed Sibia", "Streaked Spiderhunter", "Orange-bellied Leafbird"],
-    answer: 1,
+    options: ["Silver-breasted Broadbill", "Streaked Spiderhunter", "Long-tailed Sibia", "Orange-bellied Leafbird"],
+    answer: 2,
     timeLimit: 5
   },
   {
     image: "photos/quiz6.jpg",
     question: "Guess the bird?",
-    options: ["Cinereous Bulbul", "Yellow-vented Bulbul", "Long-tailed Broadbill", "Orange Minivet"],
+    options: ["Orange-breasted Trogon", "Taiwan Barbet", "Red-bearded Bee-eater", "Black-crested Bulbul"],
     answer: 0,
     timeLimit: 5
   },
   {
     image: "photos/quiz7.jpg",
     question: "Guess the bird?",
-    options: ["Long-tailed Broadbill", "Rufous-bellied Eagle", "Streaked Wren-Babbler", "Taiwan Barbet"],
-    answer: 1,
+    options: ["Rufous-bellied Eagle", "Long-tailed Sibia", "Great Hornbill", "Long-tailed Broadbill"],
+    answer: 3,
     timeLimit: 5
   },
   {
@@ -663,6 +708,20 @@ const quizzes = [
     question: "Guess the bird?",
     options: ["Orange-bellied Leafbird", "Red-bearded Bee-eater", "Cinereous Bulbul", "Black-crested Bulbul"],
     answer: 0,
+    timeLimit: 5
+  },
+  {
+    image: "photos/quiz9.jpg",
+    question: "Guess the bird?",
+    options: ["Long-tailed Sibia", "Rufous-bellied Eagle", "Red-bearded Bee-eater", "Orange-breasted Trogon"],
+    answer: 2,
+    timeLimit: 5
+  },
+  {
+    image: "photos/quiz10.jpg",
+    question: "Guess the bird?",
+    options: ["Orange-breasted Trogon", "Long-tailed Broadbill", "Black-browed Barbet", "Red-bearded Bee-eater"],
+    answer: 2,
     timeLimit: 5
   },
 ];
@@ -693,6 +752,7 @@ const screens = {
 };
 
 const bgImg      = document.getElementById('quiz-bg');
+const quizPhoto  = document.getElementById('quiz-photo');
 const hudScore   = document.getElementById('hud-score');
 const hudRound   = document.getElementById('hud-round');
 const progFill   = document.getElementById('progress-fill');
@@ -782,6 +842,7 @@ function loadQuiz(index) {
 
   /* Background image — tries multiple formats automatically */
   loadImage(bgImg, quiz.image, null);
+  loadImage(quizPhoto, quiz.image, null);
 
   /* Question */
   qEyebrow.textContent = 'ROUND ' + (index + 1);
@@ -981,14 +1042,16 @@ function endGame() {
   /* Clear background image */
   bgImg.classList.remove('visible');
   bgImg.src = '';
+  quizPhoto.classList.remove('visible');
+  quizPhoto.src = '';
 }
 
 function getScoreMessage(pct) {
-  if (pct === 100) return { title:'PERFECT!',     trophy:'🏆', message:"Incredible! A flawless run — you truly know your biodiversity!" };
-  if (pct >= 80)   return { title:'EXCELLENT!',   trophy:'🏆', message:"Outstanding nature knowledge! The rainforest would be proud." };
-  if (pct >= 60)   return { title:'WELL DONE!',   trophy:'🎯', message:"Great effort! You've got a good eye for the natural world." };
-  if (pct >= 40)   return { title:'NOT BAD!',     trophy:'🎯', message:"A solid start! Explore more of our trails and try again." };
-  return                   { title:'KEEP TRYING!', trophy:'🎯', message:"Every explorer starts somewhere — visit us again and beat your score!" };
+  if (pct === 100) return { title:'PERFECT!',     trophy:'🏆', message:"Outstanding! You identified every species correctly. Amazing work!" };
+  if (pct >= 80)   return { title:'EXCELLENT!',   trophy:'🏆', message:"Fantastic job! You know your wildlife really well." };
+  if (pct >= 60)   return { title:'WELL DONE!',   trophy:'🎯', message:"Great effort! You got most of them right." };
+  if (pct >= 40)   return { title:'NOT BAD!',     trophy:'🎯', message:"Nice try! You're on your way to becoming a wildlife expert." };
+  return                   { title:'KEEP TRYING!', trophy:'🎯', message:"Don't give up! Every quiz is a chance to learn something new." };
 }
 
 
